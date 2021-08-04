@@ -16,6 +16,7 @@ for year in Years:
         u = requests.post('https://www.kanoon.ir/Public/SuperiorsRankBasedUpdateUni',data= {'year': year, 'dept': dept, 'ReshteId': 0})
         u = re.findall(":(\d*),", u.text)
         Universities = list(map(int, u))
+        Universities = [31]
         for uni in Universities:
             r = requests.post('https://www.kanoon.ir/Public/SuperiorsRankBasedUpdateReshte',data= {'year': year, 'dept' : dept , 'uniId': uni})
             r = re.findall(":(\d*),", r.text)
@@ -25,10 +26,12 @@ for year in Years:
                 workbookid = re.findall("\('(.*)'", html_doc.text)
                 workbookid = list(map(str, workbookid))
                 soup = BeautifulSoup(html_doc.text, 'html.parser')
-                if len(html_doc.text) <= 1350 :
-                    print('ERROR NOT FOUND FROM SITE {} {} {} {}'.format(year,dept,uni,reshte))
+                soup = soup.find('table')
+                if type(soup)=='NoneType' :
+                    print('ERROR ON {} {} {} {}'.format(year,dept,uni,reshte))
+                elif soup == None:
+                    print('ERROR')
                 else:
-                    soup = soup.find('table')
                     soup = soup.find_all('tr')[1:]
                     for count0,row in enumerate(soup):
                         for count, td in enumerate(row):
@@ -48,6 +51,8 @@ for year in Years:
                                 shahr = (td.text).rstrip()
                             elif count == 15:
                                 DayNight = (td.text).rstrip()
+                                Regexx = re.findall(".*\s|\s", DayNight)[0]
+                                DayNight = DayNight[len(Regexx):]
                         #Karname
                         Karname = requests.post('https://www.kanoon.ir/Public/SuperiorsRankBasedShowWorkBook',data= {'stdCounter':workbookid[count0],'dept':str(dept),'year':str(year)})
                         soup = BeautifulSoup(Karname.text, 'html.parser')
@@ -60,8 +65,9 @@ for year in Years:
                         listKarname = list(map(int, listKarname))
 
                         #return all data from row
-                        final_list_row = [year,dept,listKarname,uni,reshte,rotbeK,rotbeS,miangine_taraz_kanooni,sahmieM,jensiat,shahr,goorooh,DayNight]
+                        final_list_row = [year,dept,uni,reshte,rotbeK,rotbeS,sahmieM,jensiat,shahr,miangine_taraz_kanooni,goorooh,DayNight,listKarname]
                         print(final_list_row)
+
                         csv_writer.writerow(final_list_row)
 
                         #time.sleep(0.5)
