@@ -27,10 +27,8 @@ for year in Years:
                 workbookid = list(map(str, workbookid))
                 soup = BeautifulSoup(html_doc.text, 'html.parser')
                 soup = soup.find('table')
-                if type(soup)=='NoneType' :
+                if type(soup)=='NoneType' or soup == None:
                     print('ERROR ON {} {} {} {}'.format(year,dept,uni,reshte))
-                elif soup == None:
-                    print('ERROR')
                 else:
                     soup = soup.find_all('tr')[1:]
                     for count0,row in enumerate(soup):
@@ -51,8 +49,6 @@ for year in Years:
                                 shahr = (td.text).rstrip()
                             elif count == 15:
                                 DayNight = (td.text).rstrip()
-                                Regexx = re.findall(".*\s|\s", DayNight)[0]
-                                DayNight = DayNight[len(Regexx):]
                         #Karname
                         Karname = requests.post('https://www.kanoon.ir/Public/SuperiorsRankBasedShowWorkBook',data= {'stdCounter':workbookid[count0],'dept':str(dept),'year':str(year)})
                         soup = BeautifulSoup(Karname.text, 'html.parser')
